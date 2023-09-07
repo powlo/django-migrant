@@ -1,0 +1,22 @@
+[project]
+name = "django-nomad"
+version = "0.0.1"
+authors = [
+  { name="Paul Backhouse" },
+]
+description = "A developer utility to auto-migrate django apps when switching git branches."
+readme = "README.md"
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/powlo/django-nomad"
+"Bug Tracker" = "https://github.com/powlo/django-nomad/issues"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"

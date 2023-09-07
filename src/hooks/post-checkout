@@ -1,0 +1,27 @@
+#!/bin/bash
+# .git/hooks/post-checkout
+
+
+# First dump migrations that have been applied on this branch.
+# NB this doesn't work if the user checks out a random commit.
+python -m django_nomad dump
+
+if [ ! -z $STAGE ] && [ $STAGE == "start" ]
+then
+    SOURCE_BRANCH=`git branch --show-current`
+    DESTINATION_BRANCH=`git rev-parse --symbolic-full-name --abbrev-ref=loose @{-1}`
+    TARGETS=`python -m django_nomad find_targets --src $SOURCE_BRANCH --dest $DESTINATION_BRANCH`
+    while IFS= read -r target; do
+        python manage.py migrate $target
+    done <<< "$TARGETS"
+    exit 0
+elif [ ! -z $STAGE ] && [ $STAGE == "second" ]
+then
+    python manage.py migrate
+    exit 0
+fi
+
+export STAGE=start
+git switch --quiet -
+export STAGE=second
+git switch --quiet -
