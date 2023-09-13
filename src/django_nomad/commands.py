@@ -1,10 +1,14 @@
 import json
+import shutil
+from importlib import resources
 from pathlib import Path
 
 from django.db import DEFAULT_DB_ALIAS, connections
 from django.db.migrations.loader import MigrationLoader
 from dulwich import porcelain
 from dulwich.repo import Repo
+
+from . import hook_templates
 
 
 def dump(args):
@@ -48,3 +52,11 @@ def find_targets(args):
                     targets.add(parent.key)
     for t in list(targets):
         print(f"{t[0]} {t[1]}")
+
+
+def install(args):
+    git_hooks_path = args.dest / ".git" / "hooks"
+    post_checkout_file = resources.files(hook_templates) / "post-checkout"
+
+    shutil.copy(post_checkout_file, git_hooks_path)
+    print(f"git hook created: {post_checkout_file}")
