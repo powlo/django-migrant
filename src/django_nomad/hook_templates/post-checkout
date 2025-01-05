@@ -3,21 +3,21 @@
 
 
 # First dump migrations that have been applied on this branch.
-if [ -z $STAGE ]
+if [ -z $DJANGO_NOMAD_STAGE ]
 then
     python -m django_nomad dump
-    export STAGE=start
+    export DJANGO_NOMAD_STAGE=start
     git checkout --quiet -
-elif [ ! -z $STAGE ] && [ $STAGE == "start" ]
+elif [ ! -z $DJANGO_NOMAD_STAGE ] && [ $DJANGO_NOMAD_STAGE == "start" ]
 then
     TARGETS=`python -m django_nomad find_targets`
     while IFS= read -r target; do
         python manage.py migrate $target
     done <<< "$TARGETS"
-    export STAGE=second
+    export DJANGO_NOMAD_STAGE=second
     git checkout --quiet -
-elif [ ! -z $STAGE ] && [ $STAGE == "second" ]
+elif [ ! -z $DJANGO_NOMAD_STAGE ] && [ $DJANGO_NOMAD_STAGE == "second" ]
 then
     python manage.py migrate
-    unset STAGE
+    unset DJANGO_NOMAD_STAGE
 fi
