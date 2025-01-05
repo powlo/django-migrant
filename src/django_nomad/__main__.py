@@ -36,8 +36,8 @@ subparsers = parser.add_subparsers(required=True)
 dump_parser = subparsers.add_parser("dump")
 dump_parser.set_defaults(func=commands.dump)
 
-find_targets_parser = subparsers.add_parser("find_targets")
-find_targets_parser.set_defaults(func=commands.find_targets)
+rollback_parser = subparsers.add_parser("rollback")
+rollback_parser.set_defaults(func=commands.rollback)
 
 install_parser = subparsers.add_parser("install")
 install_parser.add_argument("dest", type=valid_path_for_hooks)

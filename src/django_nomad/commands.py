@@ -3,6 +3,7 @@ import shutil
 from importlib import resources
 from pathlib import Path
 
+from django.core.management import call_command
 from django.db import DEFAULT_DB_ALIAS, connections
 from django.db.migrations.loader import MigrationLoader
 
@@ -22,7 +23,7 @@ def dump(args):
         fh.write(targets_as_json)
 
 
-def find_targets(args):
+def rollback(args):
     connection = connections[DEFAULT_DB_ALIAS]
     loader = MigrationLoader(connection)
     base_path = Path(".")
@@ -41,7 +42,7 @@ def find_targets(args):
                 if parent not in nodes:
                     targets.add(parent.key)
     for t in list(targets):
-        print(f"{t[0]} {t[1]}")
+        call_command("migrate", t[0], t[1])
 
 
 def install(args):

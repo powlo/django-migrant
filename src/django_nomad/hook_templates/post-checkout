@@ -10,10 +10,7 @@ then
     git checkout --quiet -
 elif [ ! -z $DJANGO_NOMAD_STAGE ] && [ $DJANGO_NOMAD_STAGE == "start" ]
 then
-    TARGETS=`python -m django_nomad find_targets`
-    while IFS= read -r target; do
-        python manage.py migrate $target
-    done <<< "$TARGETS"
+    python -m django_nomad rollback
     export DJANGO_NOMAD_STAGE=second
     git checkout --quiet -
 elif [ ! -z $DJANGO_NOMAD_STAGE ] && [ $DJANGO_NOMAD_STAGE == "second" ]
