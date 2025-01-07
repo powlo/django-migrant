@@ -1,20 +1,4 @@
 #!/bin/bash
 # .git/hooks/post-checkout
 
-
-# First dump migrations that have been applied on this branch.
-if [ -z $DJANGO_NOMAD_STAGE ]
-then
-    python -m django_nomad dump
-    export DJANGO_NOMAD_STAGE=start
-    git checkout --quiet -
-elif [ ! -z $DJANGO_NOMAD_STAGE ] && [ $DJANGO_NOMAD_STAGE == "start" ]
-then
-    python -m django_nomad rollback
-    export DJANGO_NOMAD_STAGE=second
-    git checkout --quiet -
-elif [ ! -z $DJANGO_NOMAD_STAGE ] && [ $DJANGO_NOMAD_STAGE == "second" ]
-then
-    python manage.py migrate
-    unset DJANGO_NOMAD_STAGE
-fi
+.venv/bin/python -m django_nomad dump
