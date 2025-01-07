@@ -26,7 +26,7 @@ def stage_one():
 
     env_with_stage_two = os.environ.copy()
     env_with_stage_two["DJANGO_NOMAD_STAGE"] = "TWO"
-    subprocess.run(["git", "checkout", "-"], env=env_with_stage_two)
+    subprocess.run(["git", "checkout", "-", "--quiet"], env=env_with_stage_two)
 
 
 def stage_two():
@@ -52,7 +52,7 @@ def stage_two():
 
     env_with_stage_three = os.environ.copy()
     env_with_stage_three["DJANGO_NOMAD_STAGE"] = "THREE"
-    subprocess.run(["git", "checkout", "-"], env=env_with_stage_three)
+    subprocess.run(["git", "checkout", "-", "--quiet"], env=env_with_stage_three)
 
 
 def stage_three():
