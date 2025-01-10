@@ -97,12 +97,12 @@ class Command(BaseCommand):
 
         migrate_parser.set_defaults(method=self.migrate)
 
-    def install(args):
-        git_hooks_path = args.dest / ".git" / "hooks"
+    def install(self, *args, **options):
+        git_hooks_path = options["dest"] / ".git" / "hooks"
         post_checkout_file = resources.files(hook_templates) / "post-checkout"
 
         shutil.copy(post_checkout_file, git_hooks_path)
-        print(f"git hook created: {post_checkout_file}")
+        self.stdout.write(f"git hook created: {post_checkout_file}")
 
     def handle(self, *args, method, **options):
         method(*args, **options)
