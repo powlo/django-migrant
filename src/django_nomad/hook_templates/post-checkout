@@ -1,4 +1,4 @@
 #!/bin/bash
 # .git/hooks/post-checkout
 
-.venv/bin/python -m django_nomad dump
+.venv/bin/python -m django_nomad migrate
