@@ -97,15 +97,15 @@ class Command(BaseCommand):
 
         migrate_parser.set_defaults(method=self.migrate)
 
+    def handle(self, *args, method, **options):
+        method(*args, **options)
+
     def install(self, *args, **options):
         git_hooks_path = options["dest"] / ".git" / "hooks"
         post_checkout_file = resources.files(hook_templates) / "post-checkout"
 
         shutil.copy(post_checkout_file, git_hooks_path)
         self.stdout.write(f"git hook created: {post_checkout_file}")
-
-    def handle(self, *args, method, **options):
-        method(*args, **options)
 
     def migrate(self, *args, **options):
         DJANGO_NOMAD_STAGE = os.environ.get("DJANGO_NOMAD_STAGE")
