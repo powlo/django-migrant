@@ -10,8 +10,6 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import DEFAULT_DB_ALIAS, connections
 from django.db.migrations.loader import MigrationLoader
 
-from django_nomad import hook_templates
-
 
 def valid_path_for_hooks(path):
     # A validator that ensures the given path is a git repo with hooks,
@@ -102,7 +100,9 @@ class Command(BaseCommand):
 
     def install(self, *args, **options):
         git_hooks_path = options["dest"] / ".git" / "hooks"
-        post_checkout_file = resources.files(hook_templates) / "post-checkout"
+        post_checkout_file = (
+            resources.files("django_nomad") / "hook_templates" / "post-checkout"
+        )
 
         shutil.copy(post_checkout_file, git_hooks_path)
         self.stdout.write(f"git hook created: {post_checkout_file}")
