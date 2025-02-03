@@ -41,6 +41,8 @@ def stage_one():
 
     env_with_stage_two = os.environ.copy()
     env_with_stage_two["DJANGO_NOMAD_STAGE"] = "TWO"
+    # NB: We use raw subprocess because dulwich (used to interface with git repos)
+    # doesn't support the relative branch "-".
     subprocess.run(["git", "checkout", "-", "--quiet"], env=env_with_stage_two)
 
 
