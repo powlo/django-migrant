@@ -83,7 +83,7 @@ class Command(BaseCommand):
 
         install_parser = subparsers.add_parser(
             "install",
-            help="Installs the command into 'post-checkout' git hook.",
+            help="Installs the command to run in a 'post-checkout' git hook.",
         )
         install_parser.set_defaults(method=self.install)
         install_parser.add_argument("dest", type=valid_path_for_hooks)
