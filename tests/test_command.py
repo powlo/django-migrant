@@ -60,6 +60,14 @@ class DjangoSetupTestCase(SimpleTestCase):
 
 class ValidatorTests(DjangoSetupTestCase):
 
+    def test_simple(self):
+        the_mock = get_mock_path(is_dir=True, is_true=True)
+        with mock.patch("django_nomad.management.commands.nomad.Path", new=the_mock):
+            path = valid_path_for_hooks("amockedpath")
+
+        the_mock.assert_called_once_with("amockedpath")
+        self.assertTrue(isinstance(path, Path))
+
     @mock.patch(
         "django_nomad.management.commands.nomad.Path", get_mock_path(is_dir=False)
     )
