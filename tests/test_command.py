@@ -3,26 +3,11 @@ from io import StringIO
 from pathlib import Path
 from unittest import mock
 
-import django
-from django.conf import settings
 from django.core.management import call_command
 from django.core.management.base import CommandError
-from django.test import SimpleTestCase
 
 from django_nomad.management.commands.nomad import valid_path_for_hooks
-
-# Settings configuration has to be outside of test cases
-# to allow test discovery to work.
-# May need to wrap in exception catcher, and/or put in test class.
-try:
-    settings.configure(
-        INSTALLED_APPS=[
-            "django_nomad",
-        ]
-    )
-except RuntimeError as err:
-    if str(err) != "Settings already configured.":
-        raise
+from tests.testcases import DjangoSetupTestCase
 
 
 def get_mock_path(is_dir=False, is_file=False, is_true=False):
@@ -47,15 +32,6 @@ def get_mock_path(is_dir=False, is_file=False, is_true=False):
             return is_file
 
     return MockPath()
-
-
-class DjangoSetupTestCase(SimpleTestCase):
-
-    def setUp(self):
-
-        django.setup()
-
-        return super().setUp()
 
 
 class ValidatorTests(DjangoSetupTestCase):
