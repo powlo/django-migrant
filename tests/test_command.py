@@ -1,4 +1,5 @@
 import os
+import unittest
 from io import StringIO
 from pathlib import Path
 from unittest import mock
@@ -34,7 +35,7 @@ def get_mock_path(is_dir=False, is_file=False, is_true=False):
     return MockPath()
 
 
-class ValidatorTests(DjangoSetupTestCase):
+class ValidatorTests(unittest.TestCase):
 
     def test_simple(self):
         the_mock = get_mock_path(is_dir=True, is_true=True)
