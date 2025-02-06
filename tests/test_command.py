@@ -1,5 +1,4 @@
 import os
-import unittest
 from io import StringIO
 from pathlib import Path
 from unittest import mock
@@ -7,7 +6,6 @@ from unittest import mock
 from django.core.management import call_command
 from django.core.management.base import CommandError
 
-from django_nomad.management.commands.nomad import valid_path_for_hooks
 from tests.testcases import DjangoSetupTestCase
 
 
@@ -33,46 +31,6 @@ def get_mock_path(is_dir=False, is_file=False, is_true=False):
             return is_file
 
     return MockPath()
-
-
-class ValidatorTests(unittest.TestCase):
-
-    def test_simple(self):
-        the_mock = get_mock_path(is_dir=True, is_true=True)
-        with mock.patch("django_nomad.management.commands.nomad.Path", new=the_mock):
-            path = valid_path_for_hooks("amockedpath")
-
-        the_mock.assert_called_once_with("amockedpath")
-        self.assertTrue(isinstance(path, Path))
-
-    @mock.patch(
-        "django_nomad.management.commands.nomad.Path", get_mock_path(is_dir=False)
-    )
-    def test_not_git_dir(self):
-        with self.assertRaises(CommandError) as context:
-            valid_path_for_hooks("amockedpath")
-        msg = str(context.exception)
-        self.assertTrue("does not appear to contain a git repo" in msg)
-
-    @mock.patch(
-        "django_nomad.management.commands.nomad.Path",
-        get_mock_path(is_dir=True, is_true=False),
-    )
-    def test_no_githooks_path(self):
-        with self.assertRaises(CommandError) as context:
-            valid_path_for_hooks("amockedpath")
-        msg = str(context.exception)
-        self.assertTrue("does not contain a 'hooks' directory" in msg)
-
-    @mock.patch(
-        "django_nomad.management.commands.nomad.Path",
-        get_mock_path(is_dir=True, is_true=True, is_file=True),
-    )
-    def test_file_already_exists(self):
-        with self.assertRaises(CommandError) as context:
-            valid_path_for_hooks("amockedpath")
-        msg = str(context.exception)
-        self.assertTrue("already contains a post-checkout hook" in msg)
 
 
 class CommandTests(DjangoSetupTestCase):
@@ -101,6 +59,35 @@ class CommandTests(DjangoSetupTestCase):
         self.assertEqual(err, "")
 
         mock_copy.assert_called_once()
+
+    @mock.patch(
+        "django_nomad.management.commands.nomad.Path", get_mock_path(is_dir=False)
+    )
+    def test_install_not_git_dir(self):
+        with self.assertRaises(CommandError) as context:
+            self.call_command("install", "/a/destination/")
+        msg = str(context.exception)
+        self.assertTrue("does not appear to contain a git repo" in msg)
+
+    @mock.patch(
+        "django_nomad.management.commands.nomad.Path",
+        get_mock_path(is_dir=True, is_true=False),
+    )
+    def test_install_no_githooks_path(self):
+        with self.assertRaises(CommandError) as context:
+            self.call_command("install", "/a/destination/")
+        msg = str(context.exception)
+        self.assertTrue("does not contain a 'hooks' directory" in msg)
+
+    @mock.patch(
+        "django_nomad.management.commands.nomad.Path",
+        get_mock_path(is_dir=True, is_true=True, is_file=True),
+    )
+    def test_install_file_already_exists(self):
+        with self.assertRaises(CommandError) as context:
+            self.call_command("install", "/a/destination/")
+        msg = str(context.exception)
+        self.assertTrue("already contains a post-checkout hook" in msg)
 
     @mock.patch("django_nomad.management.commands.nomad.stage_one")
     def test_migrate_stage_one(self, mock_stage_one):
