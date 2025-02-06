@@ -11,22 +11,6 @@ from django.db import DEFAULT_DB_ALIAS, connections
 from django.db.migrations.loader import MigrationLoader
 
 
-def valid_path_for_hooks(path):
-    # A validator that ensures the given path is a git repo with hooks,
-    # but does not contain a post-checkout script.
-    path = Path(path)
-    git_path = path / ".git"
-    githooks_path = git_path / "hooks"
-    post_checkout_file = githooks_path / "post-checkout"
-    if not git_path.is_dir():
-        raise CommandError(f"'{path}' does not appear to contain a git repo.")
-    elif not githooks_path:
-        raise CommandError(f"'{path}' does not contain a 'hooks' directory.")
-    elif post_checkout_file.is_file():
-        raise CommandError(f"'{path}' already contains a post-checkout hook.")
-    return path
-
-
 def stage_one():
     base_path = Path(".")
     filename = base_path / ".nomad" / "nodes.json"
@@ -88,7 +72,7 @@ class Command(BaseCommand):
             help="Installs the command to run in a 'post-checkout' git hook.",
         )
         install_parser.set_defaults(method=self.install)
-        install_parser.add_argument("dest", type=valid_path_for_hooks)
+        install_parser.add_argument("dest")
 
         migrate_parser = subparsers.add_parser(
             "migrate",
@@ -101,13 +85,27 @@ class Command(BaseCommand):
         method(*args, **options)
 
     def install(self, *args, **options):
-        git_hooks_path = options["dest"] / ".git" / "hooks"
-        post_checkout_file = (
+        path = Path(options["dest"])
+        git_path = path / ".git"
+
+        # Validate the given destination.
+        if not git_path.is_dir():
+            raise CommandError(f"'{path}' does not appear to contain a git repo.")
+
+        dest_git_hooks_path = path / ".git" / "hooks"
+        if not dest_git_hooks_path:
+            raise CommandError(f"'{path}' does not contain a 'hooks' directory.")
+
+        dest_post_checkout_file = dest_git_hooks_path / "post-checkout"
+        if dest_post_checkout_file.is_file():
+            raise CommandError(f"'{path}' already contains a post-checkout hook.")
+
+        src_post_checkout_file = (
             resources.files("django_nomad") / "hook_templates" / "post-checkout"
         )
 
-        shutil.copy(post_checkout_file, git_hooks_path)
-        self.stdout.write(f"git hook created: {post_checkout_file}")
+        shutil.copy(src_post_checkout_file, dest_git_hooks_path)
+        self.stdout.write(f"git hook created: {dest_post_checkout_file}")
 
     def migrate(self, *args, **options):
         DJANGO_NOMAD_STAGE = os.environ.get("DJANGO_NOMAD_STAGE")

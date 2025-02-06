@@ -89,16 +89,18 @@ class CommandTests(DjangoSetupTestCase):
         )
         return out.getvalue(), err.getvalue()
 
-    @mock.patch("django_nomad.management.commands.nomad.valid_path_for_hooks")
+    @mock.patch(
+        "django_nomad.management.commands.nomad.Path",
+        get_mock_path(is_dir=True, is_true=True, is_file=False),
+    )
     @mock.patch("django_nomad.management.commands.nomad.shutil.copy")
-    def test_install(self, mock_copy, mock_valid_path_for_hooks):
+    def test_install(self, mock_copy):
         out, err = self.call_command("install", "/a/destination/")
 
         self.assertTrue(out.startswith("git hook created: "))
         self.assertEqual(err, "")
 
         mock_copy.assert_called_once()
-        mock_valid_path_for_hooks.assert_called_once()
 
     @mock.patch("django_nomad.management.commands.nomad.stage_one")
     def test_migrate_stage_one(self, mock_stage_one):
