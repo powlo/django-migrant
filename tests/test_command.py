@@ -1,4 +1,6 @@
 import os
+import sys
+from importlib import resources
 from io import StringIO
 from pathlib import Path
 from unittest import mock
@@ -51,14 +53,28 @@ class CommandTests(DjangoSetupTestCase):
         "django_nomad.management.commands.nomad.Path",
         get_mock_path(is_dir=True, is_true=True, is_file=False),
     )
-    @mock.patch("django_nomad.management.commands.nomad.shutil.copy")
-    def test_install(self, mock_copy):
-        out, err = self.call_command("install", "/a/destination/")
+    def test_install(self):
 
+        # This replicates what we expect to happen in script, because in order
+        # to mock the write we have to also mock the read. But we want the read
+        # to behave as normal.
+        src_post_checkout_file = (
+            resources.files("django_nomad") / "hook_templates" / "post-checkout"
+        )
+
+        with open(src_post_checkout_file, "r") as fh:
+            template = fh.read()
+
+        mock_open = mock.mock_open(read_data=template)
+        with mock.patch("django_nomad.management.commands.nomad.open", mock_open):
+            out, err = self.call_command("install", "/a/destination/")
+
+        handle = mock_open()
+        handle.write.assert_called_once()
+
+        self.assertTrue(sys.executable in handle.write.call_args[0][0])
         self.assertTrue(out.startswith("git hook created: "))
         self.assertEqual(err, "")
-
-        mock_copy.assert_called_once()
 
     @mock.patch(
         "django_nomad.management.commands.nomad.Path", get_mock_path(is_dir=False)

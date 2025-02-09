@@ -1,7 +1,7 @@
 import json
 import os
-import shutil
 import subprocess
+import sys
 from importlib import resources
 from pathlib import Path
 
@@ -73,6 +73,7 @@ class Command(BaseCommand):
         )
         install_parser.set_defaults(method=self.install)
         install_parser.add_argument("dest")
+        install_parser.add_argument("-i", "--interpreter", default=sys.executable)
 
         migrate_parser = subparsers.add_parser(
             "migrate",
@@ -104,7 +105,14 @@ class Command(BaseCommand):
             resources.files("django_nomad") / "hook_templates" / "post-checkout"
         )
 
-        shutil.copy(src_post_checkout_file, dest_git_hooks_path)
+        with open(src_post_checkout_file, "r") as fh:
+            template = fh.read()
+
+        template = template.replace("{{ interpreter }}", options["interpreter"])
+
+        with open(dest_post_checkout_file, "w") as fh:
+            fh.write(template)
+
         self.stdout.write(f"git hook created: {dest_post_checkout_file}")
 
     def migrate(self, *args, **options):
