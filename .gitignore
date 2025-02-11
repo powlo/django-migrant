@@ -1,2 +1,3 @@
 dist/
 .flake8
+.coverage
