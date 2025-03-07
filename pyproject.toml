@@ -15,6 +15,10 @@ classifiers = [
 dependencies = [
   "django"
 ]
+
+[tool.setuptools.package-data]
+django_nomad = ["hook_templates/post-checkout"]
+
 [project.urls]
 "Homepage" = "https://github.com/powlo/django-nomad"
 "Bug Tracker" = "https://github.com/powlo/django-nomad/issues"
