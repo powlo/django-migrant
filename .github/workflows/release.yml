@@ -21,4 +21,5 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
             python -m build
-            gh release create ${{ github.ref_name }}
+            VERSION=${${{ github.ref_name }}/v}
+            gh release create ${{ github.ref_name }} ./dist/django_nomad-${ VERSION }.*
