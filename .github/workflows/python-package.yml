@@ -18,7 +18,8 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ["3.9", "3.10", "3.11"]
-
+    outputs:
+      newPackageVersion: ${{ steps.versionCheck.outputs.newPackageVersion }}
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python ${{ matrix.python-version }}
@@ -40,7 +41,18 @@ jobs:
       run: |
         coverage run -m --omit="tests/*" unittest discover
         coverage report --show-missing
+    - name: Check If Version Is New
+      id: versionCheck
+      run: |
+        VERSION=v$(sed -nr "s/^version.*=.*\"([[:digit:]]+.[[:digit:]]+.[[:digit:]]+)\"/\1/p" pyproject.toml)
+        gh release view $VERSION
+        exists=$?
+        if [[ ! exists ]]; 
+        then echo "newPackageVersion=true" >>$GITHUB_OUTPUT
+        else echo "newPackageVersion=false" >>$GITHUB_OUTPUT
+        fi
   package:
+    if: needs.test.outputs.newPackageVersion == 'true'
     needs: test
     runs-on: ubuntu-latest
     steps:
@@ -78,8 +90,4 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-            VERSION=v$(find dist/ -name *.whl | sed -nr "s/dist\/django_nomad-([[:digit:]].[[:digit:]].[[:digit:]]+)-.*/\1/p")
-            exists=$(gh release view $VERSION)
-            if [[ exists ]]; then exit; fi
-            echo "Creating Release $VERSION!"
             gh release create --notes '' $VERSION ./dist/django_nomad.*
