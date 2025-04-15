@@ -3,7 +3,7 @@
 # For more information see:
 # https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
 
-name: Python package
+name: Test
 
 on:
   push:
@@ -14,80 +14,23 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.9", "3.10", "3.11"]
-    outputs:
-      newPackageVersion: ${{ steps.versionCheck.outputs.newPackageVersion }}
     steps:
     - uses: actions/checkout@v4
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
+    - uses: actions/setup-python@v3
       with:
-        python-version: ${{ matrix.python-version }}
+        python-version: 3.x
     - name: Install Dependencies
       run: |
         python -m pip install --upgrade pip
         python -m pip install flake8 coverage
         python -m pip install --editable .
-    - name: Lint With Flake8
+    - name: Lint
       run: |
         # stop the build if there are Python syntax errors or undefined names
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-    - name: Run Tests
+    - name: Test
       run: |
         coverage run -m --omit="tests/*" unittest discover
         coverage report --show-missing
-    - name: Check If Version Is New
-      id: versionCheck
-      run: |
-        VERSION=v$(sed -nr "s/^version.*=.*\"([[:digit:]]+.[[:digit:]]+.[[:digit:]]+)\"/\1/p" pyproject.toml)
-        gh release view $VERSION
-        exists=$?
-        if [[ ! exists ]]; 
-        then echo "newPackageVersion=true" >>$GITHUB_OUTPUT
-        else echo "newPackageVersion=false" >>$GITHUB_OUTPUT
-        fi
-  package:
-    if: needs.test.outputs.newPackageVersion == 'true'
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v3
-        with:
-          python-version: 3.x
-      - name: Get Build Tool
-        run: |
-            python -m pip install --upgrade build
-      - name: Create Package
-        run: |
-            python -m build --outdir dist/
-      - name: Upload Package
-        uses: actions/upload-artifact@v4
-        with:
-          name: package-files
-          path: dist/django_nomad*
-  release:
-    needs: package
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v3
-        with:
-          python-version: 3.x
-      - name: Download Package
-        uses: actions/download-artifact@v4
-        with:
-          name: package-files
-          path: dist/
-      - name: Create Release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-            gh release create --notes '' $VERSION ./dist/django_nomad.*
