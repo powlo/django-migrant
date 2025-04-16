@@ -1,6 +1,10 @@
-# django-nomad
+# django-nomad 
 
-django-nomad is a tool that allows developers to automatically migrate their development database when switching from one git branch to another. A common use case is when asked to run a collegues branch you have to figure out which of your migrations need to be rolled back in order to then apply your collegues migrations.
+![Workflow Status](https://img.shields.io/github/actions/workflow/status/powlo/django-nomad/test.yml?label=master)
+![GitHub Release](https://img.shields.io/github/v/release/powlo/django-nomad)
+![GitHub License](https://img.shields.io/github/license/powlo/django-nomad)
+
+`django-nomad` is a tool that allows developers to automatically migrate their development database when switching from one git branch to another. A common use case is when asked to run a collegues branch you have to figure out which of your migrations need to be rolled back in order to then apply your collegues migrations.
 
 This is especially convenient when your database is populated in a prefered state for your own in-progress development.
 
