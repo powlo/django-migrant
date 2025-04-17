@@ -16,6 +16,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+      with:
+        fetch-tags: true
     - uses: actions/setup-python@v3
       with:
         python-version: 3.x
@@ -44,3 +46,12 @@ jobs:
         gist_id=$(gh gist list --public | sed -nE "s/^(\w+)\s+django-nomad_coverage.json.*/\1/p")
         gh gist edit $gist_id --remove django-nomad_coverage.json
         gh gist edit $gist_id --add django-nomad_coverage.json
+    - name: Tag
+      run: |
+        VERSION=v$(sed -nr "s/^version.*=.*\"([[:digit:]]+.[[:digit:]]+.[[:digit:]]+)\"/\1/p" pyproject.toml)
+        git tag $VERSION
+        tag_exists=$?
+        if [[ tag_exists ]]; 
+        then echo "Tag already exists."
+        else git push --tags
+        fi
