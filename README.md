@@ -1,7 +1,7 @@
 # django-nomad 
 
 ![Branch Status](https://img.shields.io/github/actions/workflow/status/powlo/django-nomad/test.yml?label=master)
-![Coverage](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fgist.githubusercontent.com%2Fpowlo%2Fff252eaf63bf534c44d73f9a79ffea28%2Fraw%2F4b5855782e44070c5eb9deebf61654ffbdc49a8b%2Fdjango-nomad_coverage.json&query=%24.totals.percent_covered_display&label=coverage&suffix=%)
+![Coverage](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fgist.githubusercontent.com%2Fpowlo%2Fff252eaf63bf534c44d73f9a79ffea28%2Fraw%2Fdjango-nomad_coverage.json&query=%24.totals.percent_covered_display&suffix=%25&label=coverage)
 ![GitHub Release](https://img.shields.io/github/v/release/powlo/django-nomad)
 ![GitHub License](https://img.shields.io/github/license/powlo/django-nomad)
 
