@@ -44,8 +44,13 @@ jobs:
         # Update the public gist so that the README.md refects results.
         # NB this gist has to already exist!
         gist_id=$(gh gist list --public | sed -nE "s/^(\w+)\s+django-migrant_coverage.json.*/\1/p")
-        gh gist edit $gist_id --remove django-migrant_coverage.json
-        gh gist edit $gist_id --add django-migrant_coverage.json
+        if [[ gist_id ]]; 
+        then
+          gh gist edit $gist_id --remove django-migrant_coverage.json
+          gh gist edit $gist_id --add django-migrant_coverage.json
+        else
+          gh gist create --public --desc django-migrant_coverage.json django-migrant_coverage.json
+        fi
     - name: Tag
       run: |
         VERSION=v$(sed -nr "s/^version.*=.*\"([[:digit:]]+.[[:digit:]]+.[[:digit:]]+)\"/\1/p" pyproject.toml)
