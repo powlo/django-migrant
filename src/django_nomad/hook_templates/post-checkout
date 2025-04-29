@@ -6,5 +6,5 @@
 is_branch_checkout=$3
 
 if [ "$is_branch_checkout" == "1" ]; then
-    {{ interpreter }} -m django_nomad migrate
+    {{ interpreter }} -m django_migrant migrate
 fi

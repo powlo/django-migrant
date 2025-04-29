@@ -1,15 +1,14 @@
-# django-nomad 
+# django-migrant 
 
-![Branch Status](https://img.shields.io/github/actions/workflow/status/powlo/django-nomad/test.yml?label=master)
-![Coverage](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fgist.githubusercontent.com%2Fpowlo%2Fff252eaf63bf534c44d73f9a79ffea28%2Fraw%2Fdjango-nomad_coverage.json&query=%24.totals.percent_covered_display&suffix=%25&label=coverage)
-![GitHub Release](https://img.shields.io/github/v/release/powlo/django-nomad)
-![GitHub License](https://img.shields.io/github/license/powlo/django-nomad)
+![Branch Status](https://img.shields.io/github/actions/workflow/status/powlo/django-migrant/test.yml?label=master)
+![Coverage](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fgist.githubusercontent.com%2Fpowlo%2Fff252eaf63bf534c44d73f9a79ffea28%2Fraw%2Fdjango-migrant_coverage.json&query=%24.totals.percent_covered_display&suffix=%25&label=coverage)
+![GitHub Release](https://img.shields.io/github/v/release/powlo/django-migrant)
+![GitHub License](https://img.shields.io/github/license/powlo/django-migrant)
 
-`django-nomad` is a tool that allows developers to automatically migrate their development database when switching from one git branch to another. A common use case is when asked to run a collegues branch you have to figure out which of your migrations need to be rolled back in order to then apply your collegues migrations.
+`django-migrant` is a tool that allows developers to automatically migrate their development database when switching from one git branch to another. A common use case is when asked to run a collegue's branch you have to figure out which of your migrations need to be rolled back in order to then apply your collegues migrations.
 
-This is especially convenient when your database is populated in a prefered state for your own in-progress development.
-
-But note: The tool relies on proper reverse migrations having been written!
+> [!IMPORTANT]
+> The tool relies on proper reverse migrations having been written!
 
 ## Requirements:
 
@@ -18,7 +17,7 @@ But note: The tool relies on proper reverse migrations having been written!
 
 ## How it works.
 
-django-nomad will create a post-checkout hook in a repositories "hooks" directory.
+django-migrant will create a post-checkout hook in a repositories "hooks" directory.
 
 When you checkout a branch the hook will determine which django migrations need to be rolled back, go to the previous branch and roll back, then return to your target branch and migrate forwards.
 
@@ -29,21 +28,21 @@ It will track the changes needed by creating a `.nomad` directory containing a `
 
 1) Install the python package.
 
-        pip install git+https://github.com/powlo/django-nomad@master
+        pip install git+https://github.com/powlo/django-migrant@master
 
 2) Install the post-checkout hook:
 
-        python -m django_nomad install <destination> [-i <interpreter>]
+        python -m django_migrant install <destination> [-i <interpreter>]
 
     Eg,
 
-        python -m django_nomad install .
+        python -m django_migrant install .
 
     Will attempt to install the hook in the current directory.
     
     The interpreter used by the hook can be configured using the optional `-i` / `--interpreter` switch:
 
-        python -m django_nomad install . -i ./myvenv/bin/python
+        python -m django_migrant install . -i ./myvenv/bin/python
 
 3) **IMPORTANT!** Read and verify the post-checkout hook and change permissions to allow it to be invoked.
 
@@ -57,7 +56,7 @@ If you wish you can specify the package as a django app:
     # settings.py
     INSTALLED_APPS = [
         # ...
-        "django_nomad",
+        "django_migrant",
         # ...
     ]
 
@@ -70,11 +69,11 @@ Eg,
 
     # ...
     if [ "$is_branch_checkout" == "1" ]; then
-        ./manage.py django_nomad migrate # <--- here
+        ./manage.py django_migrant migrate # <--- here
     fi
 
 (But this doesn't change the tool's behaviour.)
 
 ## Development
 
-    pip install -e git+https://github.com/powlo/django-nomad@master
+    pip install -e git+https://github.com/powlo/django-migrant@master

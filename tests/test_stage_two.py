@@ -4,15 +4,15 @@ from unittest import mock
 
 from django.db.migrations.graph import Node
 
-from django_nomad.management.commands import nomad
+from django_migrant.management.commands import nomad
 
 
 class TestStageTwo(unittest.TestCase):
 
-    @mock.patch("django_nomad.management.commands.nomad.subprocess", mock.MagicMock())
-    @mock.patch("django_nomad.management.commands.nomad.Path", mock.MagicMock())
-    @mock.patch("django_nomad.management.commands.nomad.call_command")
-    @mock.patch("django_nomad.management.commands.nomad.MigrationLoader")
+    @mock.patch("django_migrant.management.commands.nomad.subprocess", mock.MagicMock())
+    @mock.patch("django_migrant.management.commands.nomad.Path", mock.MagicMock())
+    @mock.patch("django_migrant.management.commands.nomad.call_command")
+    @mock.patch("django_migrant.management.commands.nomad.MigrationLoader")
     def test_migrate_to_zero(self, mock_loader, mock_call_command):
         # The give node 0001_initial has no parent, so we migrate to the
         # "zero" migration of that app.
@@ -34,10 +34,10 @@ class TestStageTwo(unittest.TestCase):
         self.assertTrue(len(mock_call_command.call_args_list), 1)
         self.assertEqual(mock_call_command.call_args.args, ("migrate", "polls", "zero"))
 
-    @mock.patch("django_nomad.management.commands.nomad.subprocess", mock.MagicMock())
-    @mock.patch("django_nomad.management.commands.nomad.Path", mock.MagicMock())
-    @mock.patch("django_nomad.management.commands.nomad.call_command")
-    @mock.patch("django_nomad.management.commands.nomad.MigrationLoader")
+    @mock.patch("django_migrant.management.commands.nomad.subprocess", mock.MagicMock())
+    @mock.patch("django_migrant.management.commands.nomad.Path", mock.MagicMock())
+    @mock.patch("django_migrant.management.commands.nomad.call_command")
+    @mock.patch("django_migrant.management.commands.nomad.MigrationLoader")
     def test_migrate_to_parent(self, mock_loader, mock_call_command):
         # To reverse 0002 we migrate to 0001.
 
@@ -59,10 +59,10 @@ class TestStageTwo(unittest.TestCase):
             mock_call_command.call_args.args, ("migrate", "polls", "0001_initial")
         )
 
-    @mock.patch("django_nomad.management.commands.nomad.subprocess", mock.MagicMock())
-    @mock.patch("django_nomad.management.commands.nomad.Path", mock.MagicMock())
-    @mock.patch("django_nomad.management.commands.nomad.call_command")
-    @mock.patch("django_nomad.management.commands.nomad.MigrationLoader")
+    @mock.patch("django_migrant.management.commands.nomad.subprocess", mock.MagicMock())
+    @mock.patch("django_migrant.management.commands.nomad.Path", mock.MagicMock())
+    @mock.patch("django_migrant.management.commands.nomad.call_command")
+    @mock.patch("django_migrant.management.commands.nomad.MigrationLoader")
     def test_migrate_to_single_ancestor(self, mock_loader, mock_call_command):
         # The provided file gives a list of migrations in the same app. Make sure
         # we only migrate to one of them.

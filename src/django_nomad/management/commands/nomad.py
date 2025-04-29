@@ -24,7 +24,7 @@ def stage_one():
         fh.write(targets_as_json)
 
     env_with_stage_two = os.environ.copy()
-    env_with_stage_two["DJANGO_NOMAD_STAGE"] = "TWO"
+    env_with_stage_two["django_migrant_STAGE"] = "TWO"
     # NB: We use raw subprocess because dulwich (used to interface with git repos)
     # doesn't support the relative branch "-".
     subprocess.run(["git", "checkout", "-", "--quiet"], env=env_with_stage_two)
@@ -52,7 +52,7 @@ def stage_two():
         call_command("migrate", t[0], t[1])
 
     env_with_stage_three = os.environ.copy()
-    env_with_stage_three["DJANGO_NOMAD_STAGE"] = "THREE"
+    env_with_stage_three["django_migrant_STAGE"] = "THREE"
     subprocess.run(["git", "checkout", "-", "--quiet"], env=env_with_stage_three)
 
 
@@ -102,7 +102,7 @@ class Command(BaseCommand):
             raise CommandError(f"'{path}' already contains a post-checkout hook.")
 
         src_post_checkout_file = (
-            resources.files("django_nomad") / "hook_templates" / "post-checkout"
+            resources.files("django_migrant") / "hook_templates" / "post-checkout"
         )
 
         with open(src_post_checkout_file, "r") as fh:
@@ -116,10 +116,10 @@ class Command(BaseCommand):
         self.stdout.write(f"git hook created: {dest_post_checkout_file}")
 
     def migrate(self, *args, **options):
-        DJANGO_NOMAD_STAGE = os.environ.get("DJANGO_NOMAD_STAGE")
-        if not DJANGO_NOMAD_STAGE:
+        django_migrant_STAGE = os.environ.get("django_migrant_STAGE")
+        if not django_migrant_STAGE:
             stage_one()
-        elif DJANGO_NOMAD_STAGE == "TWO":
+        elif django_migrant_STAGE == "TWO":
             stage_two()
-        elif DJANGO_NOMAD_STAGE == "THREE":
+        elif django_migrant_STAGE == "THREE":
             stage_three()

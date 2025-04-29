@@ -2,5 +2,5 @@ __pycache__/
 dist/
 .flake8
 .coverage
-*/django_nomad.egg-info/
-django-nomad_coverage.json
+*/django_migrant.egg-info/
+django-migrant_coverage.json

@@ -1,5 +1,5 @@
 [project]
-name = "django-nomad"
+name = "django-migrant"
 version = "0.0.3"
 authors = [
   { name="Paul Backhouse" },
@@ -17,11 +17,11 @@ dependencies = [
 ]
 
 [tool.setuptools.package-data]
-django_nomad = ["hook_templates/post-checkout"]
+django_migrant = ["hook_templates/post-checkout"]
 
 [project.urls]
-"Homepage" = "https://github.com/powlo/django-nomad"
-"Bug Tracker" = "https://github.com/powlo/django-nomad/issues"
+"Homepage" = "https://github.com/powlo/django-migrant"
+"Bug Tracker" = "https://github.com/powlo/django-migrant/issues"
 
 [build-system]
 requires = ["setuptools>=61.0"]
