@@ -1,14 +1,14 @@
 from unittest import mock
 
-from django_migrant.management.commands import nomad
+from django_migrant.management.commands import migrant
 from tests.testcases import DjangoSetupTestCase
 
 
 class TestStageOne(DjangoSetupTestCase):
 
-    @mock.patch("django_migrant.management.commands.nomad.subprocess", mock.MagicMock())
-    @mock.patch("django_migrant.management.commands.nomad.Path", mock.MagicMock())
-    @mock.patch("django_migrant.management.commands.nomad.MigrationLoader")
+    @mock.patch("django_migrant.management.commands.migrant.subprocess", mock.MagicMock())
+    @mock.patch("django_migrant.management.commands.migrant.Path", mock.MagicMock())
+    @mock.patch("django_migrant.management.commands.migrant.MigrationLoader")
     def test_file_written(self, mock_loader):
         mock_loader.return_value.applied_migrations = [
             ("polls", "0002_alter_question_question_text"),
@@ -20,21 +20,21 @@ class TestStageOne(DjangoSetupTestCase):
         ]
 
         with mock.patch("builtins.open", mock.mock_open()) as mock_open:
-            nomad.stage_one()
+            migrant.stage_one()
         handle = mock_open()
         handle.write.assert_called_once_with(
             '[["polls", "0002_alter_question_question_text"]]'
         )
 
-    @mock.patch("django_migrant.management.commands.nomad.Path", mock.MagicMock())
+    @mock.patch("django_migrant.management.commands.migrant.Path", mock.MagicMock())
     @mock.patch(
-        "django_migrant.management.commands.nomad.MigrationLoader", mock.MagicMock()
+        "django_migrant.management.commands.migrant.MigrationLoader", mock.MagicMock()
     )
-    @mock.patch("django_migrant.management.commands.nomad.subprocess")
+    @mock.patch("django_migrant.management.commands.migrant.subprocess")
     def test_subprocess_called(self, mock_subprocess):
 
         with mock.patch("builtins.open", mock.mock_open()):
-            nomad.stage_one()
+            migrant.stage_one()
 
         # Subprocess was called.
         mock_subprocess.run.assert_called_once()

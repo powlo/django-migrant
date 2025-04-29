@@ -41,7 +41,7 @@ class CommandTests(DjangoSetupTestCase):
         out = StringIO()
         err = StringIO()
         call_command(
-            "nomad",
+            "migrant",
             *args,
             stdout=out,
             stderr=err,
@@ -50,7 +50,7 @@ class CommandTests(DjangoSetupTestCase):
         return out.getvalue(), err.getvalue()
 
     @mock.patch(
-        "django_migrant.management.commands.nomad.Path",
+        "django_migrant.management.commands.migrant.Path",
         get_mock_path(is_dir=True, is_true=True, is_file=False),
     )
     def test_install(self):
@@ -66,7 +66,7 @@ class CommandTests(DjangoSetupTestCase):
             template = fh.read()
 
         mock_open = mock.mock_open(read_data=template)
-        with mock.patch("django_migrant.management.commands.nomad.open", mock_open):
+        with mock.patch("django_migrant.management.commands.migrant.open", mock_open):
             out, err = self.call_command("install", "/a/destination/")
 
         handle = mock_open()
@@ -77,7 +77,7 @@ class CommandTests(DjangoSetupTestCase):
         self.assertEqual(err, "")
 
     @mock.patch(
-        "django_migrant.management.commands.nomad.Path", get_mock_path(is_dir=False)
+        "django_migrant.management.commands.migrant.Path", get_mock_path(is_dir=False)
     )
     def test_install_not_git_dir(self):
         with self.assertRaises(CommandError) as context:
@@ -86,7 +86,7 @@ class CommandTests(DjangoSetupTestCase):
         self.assertTrue("does not appear to contain a git repo" in msg)
 
     @mock.patch(
-        "django_migrant.management.commands.nomad.Path",
+        "django_migrant.management.commands.migrant.Path",
         get_mock_path(is_dir=True, is_true=False),
     )
     def test_install_no_githooks_path(self):
@@ -96,7 +96,7 @@ class CommandTests(DjangoSetupTestCase):
         self.assertTrue("does not contain a 'hooks' directory" in msg)
 
     @mock.patch(
-        "django_migrant.management.commands.nomad.Path",
+        "django_migrant.management.commands.migrant.Path",
         get_mock_path(is_dir=True, is_true=True, is_file=True),
     )
     def test_install_file_already_exists(self):
@@ -105,7 +105,7 @@ class CommandTests(DjangoSetupTestCase):
         msg = str(context.exception)
         self.assertTrue("already contains a post-checkout hook" in msg)
 
-    @mock.patch("django_migrant.management.commands.nomad.stage_one")
+    @mock.patch("django_migrant.management.commands.migrant.stage_one")
     def test_migrate_stage_one(self, mock_stage_one):
         out, err = self.call_command("migrate")
         self.assertEqual(err, "")
@@ -113,7 +113,7 @@ class CommandTests(DjangoSetupTestCase):
         mock_stage_one.assert_called_once()
 
     @mock.patch.dict(os.environ, {"django_migrant_STAGE": "TWO"})
-    @mock.patch("django_migrant.management.commands.nomad.stage_two")
+    @mock.patch("django_migrant.management.commands.migrant.stage_two")
     def test_migrate_stage_two(self, mock_stage_two):
         out, err = self.call_command("migrate")
         self.assertEqual(err, "")
@@ -121,7 +121,7 @@ class CommandTests(DjangoSetupTestCase):
         mock_stage_two.assert_called_once()
 
     @mock.patch.dict(os.environ, {"django_migrant_STAGE": "THREE"})
-    @mock.patch("django_migrant.management.commands.nomad.stage_three")
+    @mock.patch("django_migrant.management.commands.migrant.stage_three")
     def test_migrate_stage_three(self, mock_stage_three):
         out, err = self.call_command("migrate")
         self.assertEqual(err, "")
