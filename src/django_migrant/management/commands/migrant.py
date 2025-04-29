@@ -13,7 +13,7 @@ from django.db.migrations.loader import MigrationLoader
 
 def stage_one():
     base_path = Path(".")
-    filename = base_path / ".nomad" / "nodes.json"
+    filename = base_path / ".migrant" / "nodes.json"
     connection = connections[DEFAULT_DB_ALIAS]
     loader = MigrationLoader(connection)
     targets = set(loader.applied_migrations) - set(loader.disk_migrations)
@@ -34,7 +34,7 @@ def stage_two():
     connection = connections[DEFAULT_DB_ALIAS]
     loader = MigrationLoader(connection)
     base_path = Path(".")
-    src_filename = base_path / ".nomad" / "nodes.json"
+    src_filename = base_path / ".migrant" / "nodes.json"
     with open(src_filename) as fh:
         node_names = [tuple(n) for n in json.loads(fh.read())]
 

@@ -2,7 +2,7 @@ import sys
 
 import django
 
-from django_migrant.management.commands.nomad import Command
+from django_migrant.management.commands.migrant import Command
 
 django.setup()
 
