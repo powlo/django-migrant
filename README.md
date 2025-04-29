@@ -21,7 +21,7 @@ django-migrant will create a post-checkout hook in a repositories "hooks" direct
 
 When you checkout a branch the hook will determine which django migrations need to be rolled back, go to the previous branch and roll back, then return to your target branch and migrate forwards.
 
-It will track the changes needed by creating a `.nomad` directory containing a `nodes.json`. 
+It will track the changes needed by creating a `.migrant` directory containing a `nodes.json`.
 
 
 ## Installation
