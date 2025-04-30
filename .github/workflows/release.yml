@@ -24,7 +24,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: package-files
-          path: dist/django_migrant*
+          path: dist/
   test:
     runs-on: ubuntu-latest
     strategy:
@@ -48,21 +48,41 @@ jobs:
       - name: Test
         run: |
           python -m unittest discover
-  release:
+  # release:
+  #   needs: test
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: actions/setup-python@v3
+  #       with:
+  #         python-version: 3.x
+  #     - name: Download Package
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: package-files
+  #         path: dist/
+  #     - name: Release
+  #       env:
+  #         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #       run: |
+  #           gh release create --notes '' $VERSION ./dist/django_migrant.*
+
+
+  publish:
     needs: test
     runs-on: ubuntu-latest
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/p/django-migrant
+    permissions:
+      id-token: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v3
-        with:
-          python-version: 3.x
       - name: Download Package
         uses: actions/download-artifact@v4
         with:
           name: package-files
           path: dist/
-      - name: Release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-            gh release create --notes '' $VERSION ./dist/django_migrant.*
+      - name: Publish distribution to TestPyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
