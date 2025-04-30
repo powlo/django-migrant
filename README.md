@@ -1,11 +1,11 @@
 # django-migrant 
 
 ![Branch Status](https://img.shields.io/github/actions/workflow/status/powlo/django-migrant/test.yml?label=master)
-![Coverage](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fgist.githubusercontent.com%2Fpowlo%2Fff252eaf63bf534c44d73f9a79ffea28%2Fraw%2Fdjango-migrant_coverage.json&query=%24.totals.percent_covered_display&suffix=%25&label=coverage)
+![Coverage](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fgist.githubusercontent.com%2Fpowlo%2Fcf4b630256dbda26650c528b9eecede5%2Fraw%2Fdjango-migrant_coverage.json&query=%24.totals.percent_covered_display&suffix=%25&label=coverage)
 ![GitHub Release](https://img.shields.io/github/v/release/powlo/django-migrant)
 ![GitHub License](https://img.shields.io/github/license/powlo/django-migrant)
 
-`django-migrant` is a tool that allows developers to automatically migrate their development database when switching from one git branch to another. A common use case is when asked to run a collegue's branch you have to figure out which of your migrations need to be rolled back in order to then apply your collegues migrations.
+`django-migrant` is a tool that allows developers to automatically migrate their development database when switching from one git branch to another. A common use case is when asked to run a collegue's branch. With `django-migrant` you no longer need to figure out which migrations need to be rolled back in order to then apply another branch's migrations.
 
 > [!IMPORTANT]
 > The tool relies on proper reverse migrations having been written!
