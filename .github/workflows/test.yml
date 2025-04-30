@@ -56,8 +56,7 @@ jobs:
       run: |
         VERSION=v$(sed -nr "s/^version.*=.*\"([[:digit:]]+.[[:digit:]]+.[[:digit:]]+)\"/\1/p" pyproject.toml)
         git tag $VERSION
-        tag_exists=$?
-        if [[ tag_exists ]]; 
+        if [[ $? -neq 0 ]];
         then echo "Tag already exists."
         else git push --tags
         fi
