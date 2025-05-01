@@ -70,7 +70,7 @@ jobs:
   #           gh release create --notes '' $VERSION ./dist/django_migrant.*
 
 
-  publish:
+  publish-to-testpypi:
     needs: test
     runs-on: ubuntu-latest
     environment:
@@ -84,7 +84,24 @@ jobs:
         with:
           name: package-files
           path: dist/
-      - name: Publish distribution to TestPyPI
+      - name: Publish to TestPyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           repository-url: https://test.pypi.org/legacy/
+
+  publish-to-pypi:
+    needs: publish-to-testpypi
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/django-migrant
+    permissions:
+      id-token: write
+    steps:
+      - name: Download Package
+        uses: actions/download-artifact@v4
+        with:
+          name: package-files
+          path: dist/
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
