@@ -51,6 +51,8 @@ jobs:
           gh gist create --public --desc django-migrant_coverage.json django-migrant_coverage.json
         fi
     - name: Tag
+      env:
+        GH_TOKEN: ${{ secrets.TAG_PUSH_TOKEN }}
       run: |
         VERSION=v$(sed -nr "s/^version.*=.*\"([[:digit:]]+.[[:digit:]]+.[[:digit:]]+)\"/\1/p" pyproject.toml)
         git tag $VERSION
