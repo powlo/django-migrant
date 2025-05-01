@@ -15,6 +15,8 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    outputs:
+      isNewTag: ${{ steps.versionCheck.outputs.isNewTag }}
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-python@v3
@@ -50,10 +52,57 @@ jobs:
         else
           gh gist create --public --desc django-migrant_coverage.json django-migrant_coverage.json
         fi
+    - name: Check If Version Is New
+      id: versionCheck
+      run: |
+        VERSION=v$(sed -nr "s/^version.*=.*\"([[:digit:]]+.[[:digit:]]+.[[:digit:]]+)\"/\1/p" pyproject.toml)
+        git fetch --tags
+        exists=$(git tag --list $VERSION)
+        if [[ $exists ]]; 
+        then echo "isNewTag=false" >>$GITHUB_OUTPUT
+        else echo "isNewTag=true" >>$GITHUB_OUTPUT
+        fi
+  publish-to-testpypi:
+    needs: test
+    if: needs.test.outputs.isNewTag == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/p/django-migrant
+    permissions:
+      id-token: write
+    steps:
+      - name: Download Package
+        uses: actions/download-artifact@v4
+        with:
+          name: package-files
+          path: dist/
+      - name: Publish to TestPyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+  publish-to-pypi:
+    needs: publish-to-testpypi
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/django-migrant
+    permissions:
+      id-token: write
+    steps:
+      - name: Download Package
+        uses: actions/download-artifact@v4
+        with:
+          name: package-files
+          path: dist/
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
     - name: Tag
-      env:
-        GH_TOKEN: ${{ secrets.TAG_PUSH_TOKEN }}
       run: |
         VERSION=v$(sed -nr "s/^version.*=.*\"([[:digit:]]+.[[:digit:]]+.[[:digit:]]+)\"/\1/p" pyproject.toml)
         git tag $VERSION
-        git push --tags || true
+        git push --tags
