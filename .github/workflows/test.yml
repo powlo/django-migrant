@@ -17,8 +17,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-      with:
-        fetch-tags: true
     - uses: actions/setup-python@v3
       with:
         python-version: 3.x
@@ -56,8 +54,4 @@ jobs:
       run: |
         VERSION=v$(sed -nr "s/^version.*=.*\"([[:digit:]]+.[[:digit:]]+.[[:digit:]]+)\"/\1/p" pyproject.toml)
         git tag $VERSION
-        tag_exists=$?
-        if [ $tag_exists -ne 0 ];
-        then echo "Tag already exists."
-        else git push --tags
-        fi
+        git push --tags || true
