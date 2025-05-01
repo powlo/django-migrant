@@ -98,6 +98,7 @@ jobs:
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
   tag:
+    needs: publish-to-pypi
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
