@@ -33,6 +33,7 @@ jobs:
           path: dist/
   test:
     runs-on: ubuntu-latest
+    needs: build
     outputs:
       isNewTag: ${{ steps.versionCheck.outputs.isNewTag }}
     steps:
@@ -86,7 +87,7 @@ jobs:
         else echo "isNewTag=true" >>$GITHUB_OUTPUT
         fi
   test-others:
-    needs: test
+    needs: build
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -110,7 +111,7 @@ jobs:
         run: |
           python -m unittest discover
   publish-to-testpypi:
-    needs: test
+    needs: [test, test-others]
     if: needs.test.outputs.isNewTag == 'true'
     runs-on: ubuntu-latest
     environment:
