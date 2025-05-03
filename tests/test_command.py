@@ -112,7 +112,7 @@ class CommandTests(DjangoSetupTestCase):
 
         mock_stage_one.assert_called_once()
 
-    @mock.patch.dict(os.environ, {"django_migrant_STAGE": "TWO"})
+    @mock.patch.dict(os.environ, {"DJANGO_MIGRANT_STAGE": "TWO"})
     @mock.patch("django_migrant.management.commands.migrant.stage_two")
     def test_migrate_stage_two(self, mock_stage_two):
         out, err = self.call_command("migrate")
@@ -120,7 +120,7 @@ class CommandTests(DjangoSetupTestCase):
 
         mock_stage_two.assert_called_once()
 
-    @mock.patch.dict(os.environ, {"django_migrant_STAGE": "THREE"})
+    @mock.patch.dict(os.environ, {"DJANGO_MIGRANT_STAGE": "THREE"})
     @mock.patch("django_migrant.management.commands.migrant.stage_three")
     def test_migrate_stage_three(self, mock_stage_three):
         out, err = self.call_command("migrate")

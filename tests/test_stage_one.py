@@ -48,5 +48,5 @@ class TestStageOne(DjangoSetupTestCase):
         # And env var is set to stage two.
         second_arg = call_args[1]
         self.assertTrue("env" in second_arg)
-        self.assertTrue("django_migrant_STAGE" in second_arg["env"])
-        self.assertEqual(second_arg["env"]["django_migrant_STAGE"], "TWO")
+        self.assertTrue("DJANGO_MIGRANT_STAGE" in second_arg["env"])
+        self.assertEqual(second_arg["env"]["DJANGO_MIGRANT_STAGE"], "TWO")
