@@ -5,6 +5,6 @@
 # indicates if the checkout is branch or file.
 is_branch_checkout=$3
 
-if [ "$is_branch_checkout" == "1" ]; then
+if [ "$is_branch_checkout" == "1" ] && [ "$1" != "$2" ]; then
     {{ interpreter }} -m django_migrant migrate
 fi
