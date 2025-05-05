@@ -10,17 +10,16 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import DEFAULT_DB_ALIAS, connections
 from django.db.migrations.loader import MigrationLoader
 
+MIGRANT_FILENAME = Path(".") / ".migrant"
+
 
 def stage_one():
-    base_path = Path(".")
-    filename = base_path / ".migrant" / "nodes.json"
     connection = connections[DEFAULT_DB_ALIAS]
     loader = MigrationLoader(connection)
     targets = set(loader.applied_migrations) - set(loader.disk_migrations)
 
     targets_as_json = json.dumps(list(targets))
-    filename.parent.mkdir(exist_ok=True, parents=True)
-    with open(filename, "w+") as fh:
+    with open(MIGRANT_FILENAME, "w+") as fh:
         fh.write(targets_as_json)
 
     env_with_stage_two = os.environ.copy()
@@ -33,9 +32,7 @@ def stage_one():
 def stage_two():
     connection = connections[DEFAULT_DB_ALIAS]
     loader = MigrationLoader(connection)
-    base_path = Path(".")
-    src_filename = base_path / ".migrant" / "nodes.json"
-    with open(src_filename) as fh:
+    with open(MIGRANT_FILENAME) as fh:
         node_names = [tuple(n) for n in json.loads(fh.read())]
 
     nodes = [loader.graph.node_map[n] for n in node_names]
