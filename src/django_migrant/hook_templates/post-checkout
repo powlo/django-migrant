@@ -1,10 +1,11 @@
-#!/bin/bash
+#!/bin/sh
 # .git/hooks/post-checkout
 
 # Post checkout receives previous HEAD, current HEAD and a flag that 
 # indicates if the checkout is branch or file.
 is_branch_checkout=$3
 
-if [ "$is_branch_checkout" == "1" ] && [ "$1" != "$2" ]; then
+# $1 (previous) and $2 (current) will be equal when checking out a new branch.
+if [ "$is_branch_checkout" -eq 1 ] && [ "$1" != "$2" ]; then
     {{ interpreter }} -m django_migrant migrate
 fi
