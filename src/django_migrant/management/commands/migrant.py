@@ -90,13 +90,18 @@ class Command(BaseCommand):
         if not git_path.is_dir():
             raise CommandError(f"'{path}' does not appear to contain a git repo.")
 
-        dest_git_hooks_path = path / ".git" / "hooks"
+        dest_git_hooks_path = git_path / "hooks"
         if not dest_git_hooks_path:
             raise CommandError(f"'{path}' does not contain a 'hooks' directory.")
 
         dest_post_checkout_file = dest_git_hooks_path / "post-checkout"
         if dest_post_checkout_file.is_file():
-            raise CommandError(f"'{path}' already contains a post-checkout hook.")
+            ok_to_append = input("{path} already exists. Append to file [y/N]? ")
+            if ok_to_append.upper() != "Y":
+                raise CommandError(f"'{path}' already contains a post-checkout hook.")
+            file_exists = True
+        else:
+            file_exists = False
 
         src_post_checkout_file = (
             resources.files("django_migrant") / "hook_templates" / "post-checkout"
@@ -107,9 +112,19 @@ class Command(BaseCommand):
 
         template = template.replace("{{ interpreter }}", options["interpreter"])
 
-        with open(dest_post_checkout_file, "w") as fh:
-            fh.write(template)
+        header_file = resources.files("django_migrant") / "hook_templates" / "header"
+        with open(header_file, "r") as fh:
+            header = fh.read()
 
+        header = header.replace("{{ name }}", str(dest_post_checkout_file))
+
+        if file_exists:
+            with open(dest_post_checkout_file, "a") as fh:
+                fh.write(template)
+        else:
+            template = header + template
+            with open(dest_post_checkout_file, "a") as fh:
+                fh.write(template)
         self.stdout.write(f"git hook created: {dest_post_checkout_file}")
 
     def migrate(self, *args, **options):

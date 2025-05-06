@@ -1,7 +1,7 @@
-#!/bin/sh
-# .git/hooks/post-checkout
 
-# Post checkout receives previous HEAD, current HEAD and a flag that 
+
+##### START django_migrant #####
+# The post-checkout hook receives previous HEAD, current HEAD and a flag that
 # indicates if the checkout is branch or file.
 is_branch_checkout=$3
 
@@ -9,3 +9,4 @@ is_branch_checkout=$3
 if [ "$is_branch_checkout" -eq 1 ] && [ "$1" != "$2" ]; then
     {{ interpreter }} -m django_migrant migrate
 fi
+##### END django_migrant #####

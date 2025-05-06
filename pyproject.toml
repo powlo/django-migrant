@@ -19,7 +19,7 @@ dependencies = [
 ]
 
 [tool.setuptools.package-data]
-django_migrant = ["hook_templates/post-checkout"]
+django_migrant = ["hook_templates/post-checkout", "hook_templates/header"]
 
 [project.urls]
 "Homepage" = "https://github.com/powlo/django-migrant"

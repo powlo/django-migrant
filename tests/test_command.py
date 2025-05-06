@@ -3,6 +3,7 @@ import sys
 from importlib import resources
 from io import StringIO
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from unittest import mock
 
 from django.core.management import call_command
@@ -49,30 +50,28 @@ class CommandTests(DjangoSetupTestCase):
         )
         return out.getvalue(), err.getvalue()
 
-    @mock.patch(
-        "django_migrant.management.commands.migrant.Path",
-        get_mock_path(is_dir=True, is_true=True, is_file=False),
-    )
     def test_install(self):
 
-        # This replicates what we expect to happen in script, because in order
-        # to mock the write we have to also mock the read. But we want the read
-        # to behave as normal.
-        src_post_checkout_file = (
-            resources.files("django_migrant") / "hook_templates" / "post-checkout"
-        )
+        templates_dir = resources.files("django_migrant") / "hook_templates"
 
-        with open(src_post_checkout_file, "r") as fh:
+        with open(templates_dir / "header", "r") as fh:
+            header = fh.read()
+
+        with open(templates_dir / "post-checkout", "r") as fh:
             template = fh.read()
 
-        mock_open = mock.mock_open(read_data=template)
-        with mock.patch("django_migrant.management.commands.migrant.open", mock_open):
-            out, err = self.call_command("install", "/a/destination/")
+        with TemporaryDirectory() as temp_dir_name:
+            hooks_path = Path(temp_dir_name) / ".git" / "hooks"
+            hooks_path.mkdir(parents=True)
+            out, err = self.call_command("install", temp_dir_name)
 
-        handle = mock_open()
-        handle.write.assert_called_once()
+            with open(hooks_path / "post-checkout") as fh:
+                contents = fh.read()
+                # Only check parts of templates are present because
+                # we will have substituted filename and interpreter path
+                self.assertTrue(contents.startswith(header[:9]))
+                self.assertTrue(template[:34] in contents)
 
-        self.assertTrue(sys.executable in handle.write.call_args[0][0])
         self.assertTrue(out.startswith("git hook created: "))
         self.assertEqual(err, "")
 
@@ -99,11 +98,41 @@ class CommandTests(DjangoSetupTestCase):
         "django_migrant.management.commands.migrant.Path",
         get_mock_path(is_dir=True, is_true=True, is_file=True),
     )
-    def test_install_file_already_exists(self):
+    @mock.patch("builtins.input")
+    def test_install_file_exists_dont_append(self, mock_input):
+        # User presses 'N' when asked to append.
+        mock_input.return_value = "N"
         with self.assertRaises(CommandError) as context:
             self.call_command("install", "/a/destination/")
         msg = str(context.exception)
         self.assertTrue("already contains a post-checkout hook" in msg)
+
+    @mock.patch("builtins.input")
+    def test_install_file_exists_do_append(self, mock_input):
+        # Check behaviour when appending to an existing hook.
+
+        # User presses 'y' when asked to append.
+        mock_input.return_value = "y"
+
+        # Prepare an existing post-checkout hook
+        # Perhaps this is a better than the get_mock_path approach?
+        with TemporaryDirectory() as temp_dir_name:
+            hooks_path = Path(temp_dir_name) / ".git" / "hooks"
+            hooks_path.mkdir(parents=True)
+            post_checkout_file = hooks_path / "post-checkout"
+
+            with open(post_checkout_file, "w") as fh:
+                fh.write("Existing file contents\n")
+
+            self.call_command("install", temp_dir_name)
+
+            with open(post_checkout_file, "r") as fh:
+                contents = fh.read()
+                # Original content is still there.
+                self.assertTrue("Existing file contents" in contents)
+
+                # And content has been appended.
+                self.assertTrue("START django_migrant" in contents)
 
     @mock.patch("django_migrant.management.commands.migrant.stage_one")
     def test_migrate_stage_one(self, mock_stage_one):
