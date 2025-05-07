@@ -6,7 +6,9 @@ from tests.testcases import DjangoSetupTestCase
 
 class TestStageOne(DjangoSetupTestCase):
 
-    @mock.patch("django_migrant.management.commands.migrant.subprocess", mock.MagicMock())
+    @mock.patch(
+        "django_migrant.management.commands.migrant.subprocess", mock.MagicMock()
+    )
     @mock.patch("django_migrant.management.commands.migrant.Path", mock.MagicMock())
     @mock.patch("django_migrant.management.commands.migrant.MigrationLoader")
     def test_file_written(self, mock_loader):
@@ -20,7 +22,7 @@ class TestStageOne(DjangoSetupTestCase):
         ]
 
         with mock.patch("builtins.open", mock.mock_open()) as mock_open:
-            migrant.stage_one()
+            migrant.stage_one("abc123")
         handle = mock_open()
         handle.write.assert_called_once_with(
             '[["polls", "0002_alter_question_question_text"]]'
@@ -34,7 +36,7 @@ class TestStageOne(DjangoSetupTestCase):
     def test_subprocess_called(self, mock_subprocess):
 
         with mock.patch("builtins.open", mock.mock_open()):
-            migrant.stage_one()
+            migrant.stage_one("abc123")
 
         # Subprocess was called.
         mock_subprocess.run.assert_called_once()
@@ -43,7 +45,7 @@ class TestStageOne(DjangoSetupTestCase):
         # And was called with git checkout.
         call_args = mock_subprocess.run.call_args
         first_arg = call_args[0]
-        self.assertEqual(first_arg[0], ["git", "checkout", "-", "--quiet"])
+        self.assertEqual(first_arg[0], ["git", "checkout", "abc123", "--quiet"])
 
         # And env var is set to stage two.
         second_arg = call_args[1]

@@ -9,7 +9,9 @@ from django_migrant.management.commands import migrant
 
 class TestStageTwo(unittest.TestCase):
 
-    @mock.patch("django_migrant.management.commands.migrant.subprocess", mock.MagicMock())
+    @mock.patch(
+        "django_migrant.management.commands.migrant.subprocess", mock.MagicMock()
+    )
     @mock.patch("django_migrant.management.commands.migrant.Path", mock.MagicMock())
     @mock.patch("django_migrant.management.commands.migrant.call_command")
     @mock.patch("django_migrant.management.commands.migrant.MigrationLoader")
@@ -26,7 +28,7 @@ class TestStageTwo(unittest.TestCase):
         with mock.patch(
             "builtins.open", mock.mock_open(read_data=file_contents)
         ) as mock_open:
-            migrant.stage_two()
+            migrant.stage_two("abc123")
         handle = mock_open()
         handle.read.assert_called_once()
 
@@ -34,7 +36,9 @@ class TestStageTwo(unittest.TestCase):
         self.assertTrue(len(mock_call_command.call_args_list), 1)
         self.assertEqual(mock_call_command.call_args.args, ("migrate", "polls", "zero"))
 
-    @mock.patch("django_migrant.management.commands.migrant.subprocess", mock.MagicMock())
+    @mock.patch(
+        "django_migrant.management.commands.migrant.subprocess", mock.MagicMock()
+    )
     @mock.patch("django_migrant.management.commands.migrant.Path", mock.MagicMock())
     @mock.patch("django_migrant.management.commands.migrant.call_command")
     @mock.patch("django_migrant.management.commands.migrant.MigrationLoader")
@@ -49,7 +53,7 @@ class TestStageTwo(unittest.TestCase):
         with mock.patch(
             "builtins.open", mock.mock_open(read_data=file_contents)
         ) as mock_open:
-            migrant.stage_two()
+            migrant.stage_two("abc123")
         handle = mock_open()
         handle.read.assert_called_once()
 
@@ -59,7 +63,9 @@ class TestStageTwo(unittest.TestCase):
             mock_call_command.call_args.args, ("migrate", "polls", "0001_initial")
         )
 
-    @mock.patch("django_migrant.management.commands.migrant.subprocess", mock.MagicMock())
+    @mock.patch(
+        "django_migrant.management.commands.migrant.subprocess", mock.MagicMock()
+    )
     @mock.patch("django_migrant.management.commands.migrant.Path", mock.MagicMock())
     @mock.patch("django_migrant.management.commands.migrant.call_command")
     @mock.patch("django_migrant.management.commands.migrant.MigrationLoader")
@@ -90,7 +96,7 @@ class TestStageTwo(unittest.TestCase):
         with mock.patch(
             "builtins.open", mock.mock_open(read_data=file_contents)
         ) as mock_open:
-            migrant.stage_two()
+            migrant.stage_two("abc123")
         handle = mock_open()
         handle.read.assert_called_once()
 
@@ -99,3 +105,25 @@ class TestStageTwo(unittest.TestCase):
         self.assertEqual(
             mock_call_command.call_args.args, ("migrate", "polls", "0001_initial")
         )
+
+    @mock.patch("django_migrant.management.commands.migrant.Path", mock.MagicMock())
+    @mock.patch(
+        "django_migrant.management.commands.migrant.MigrationLoader", mock.MagicMock()
+    )
+    @mock.patch(
+        "django_migrant.management.commands.migrant.call_command", mock.MagicMock()
+    )
+    @mock.patch("django_migrant.management.commands.migrant.subprocess")
+    def test_subprocess_called(self, mock_subprocess):
+
+        with mock.patch("builtins.open", mock.mock_open()):
+            migrant.stage_one("abc123")
+
+        # Subprocess was called. Just like in stage_one.
+        mock_subprocess.run.assert_called_once()
+        self.assertEqual(len(mock_subprocess.run.call_args), 2)
+
+        # And was called with git checkout.
+        call_args = mock_subprocess.run.call_args
+        first_arg = call_args[0]
+        self.assertEqual(first_arg[0], ["git", "checkout", "abc123", "--quiet"])

@@ -136,7 +136,7 @@ class CommandTests(DjangoSetupTestCase):
 
     @mock.patch("django_migrant.management.commands.migrant.stage_one")
     def test_migrate_stage_one(self, mock_stage_one):
-        out, err = self.call_command("migrate")
+        out, err = self.call_command("migrate", "abc123")
         self.assertEqual(err, "")
 
         mock_stage_one.assert_called_once()
@@ -144,7 +144,7 @@ class CommandTests(DjangoSetupTestCase):
     @mock.patch.dict(os.environ, {"DJANGO_MIGRANT_STAGE": "TWO"})
     @mock.patch("django_migrant.management.commands.migrant.stage_two")
     def test_migrate_stage_two(self, mock_stage_two):
-        out, err = self.call_command("migrate")
+        out, err = self.call_command("migrate", "abc123")
         self.assertEqual(err, "")
 
         mock_stage_two.assert_called_once()
@@ -152,8 +152,7 @@ class CommandTests(DjangoSetupTestCase):
     @mock.patch.dict(os.environ, {"DJANGO_MIGRANT_STAGE": "THREE"})
     @mock.patch("django_migrant.management.commands.migrant.stage_three")
     def test_migrate_stage_three(self, mock_stage_three):
-        out, err = self.call_command("migrate")
+        out, err = self.call_command("migrate", "abc123")
         self.assertEqual(err, "")
 
-        mock_stage_three.assert_called_once()
         mock_stage_three.assert_called_once()

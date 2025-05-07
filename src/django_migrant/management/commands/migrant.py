@@ -13,7 +13,7 @@ from django.db.migrations.loader import MigrationLoader
 MIGRANT_FILENAME = Path(".") / ".migrant"
 
 
-def stage_one():
+def stage_one(previous):
     connection = connections[DEFAULT_DB_ALIAS]
     loader = MigrationLoader(connection)
     targets = set(loader.applied_migrations) - set(loader.disk_migrations)
@@ -26,10 +26,11 @@ def stage_one():
     env_with_stage_two["DJANGO_MIGRANT_STAGE"] = "TWO"
     # NB: We use raw subprocess because dulwich (used to interface with git repos)
     # doesn't support the relative branch "-".
-    subprocess.run(["git", "checkout", "-", "--quiet"], env=env_with_stage_two)
+    # Q: If we don't use '-' then we don't need subprocess?
+    subprocess.run(["git", "checkout", previous, "--quiet"], env=env_with_stage_two)
 
 
-def stage_two():
+def stage_two(previous):
     connection = connections[DEFAULT_DB_ALIAS]
     loader = MigrationLoader(connection)
     with open(MIGRANT_FILENAME) as fh:
@@ -50,7 +51,7 @@ def stage_two():
 
     env_with_stage_three = os.environ.copy()
     env_with_stage_three["DJANGO_MIGRANT_STAGE"] = "THREE"
-    subprocess.run(["git", "checkout", "-", "--quiet"], env=env_with_stage_three)
+    subprocess.run(["git", "checkout", previous, "--quiet"], env=env_with_stage_three)
 
 
 def stage_three():
@@ -76,6 +77,7 @@ class Command(BaseCommand):
             "migrate",
             help="Migrates database seemlessly from one git branch to another.",
         )
+        migrate_parser.add_argument("previous")
 
         migrate_parser.set_defaults(method=self.migrate)
 
@@ -128,10 +130,11 @@ class Command(BaseCommand):
         self.stdout.write(f"git hook created: {dest_post_checkout_file}")
 
     def migrate(self, *args, **options):
+        previous = options["previous"]
         DJANGO_MIGRANT_STAGE = os.environ.get("DJANGO_MIGRANT_STAGE")
         if not DJANGO_MIGRANT_STAGE:
-            stage_one()
+            stage_one(previous)
         elif DJANGO_MIGRANT_STAGE == "TWO":
-            stage_two()
+            stage_two(previous)
         elif DJANGO_MIGRANT_STAGE == "THREE":
             stage_three()

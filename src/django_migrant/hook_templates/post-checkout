@@ -7,6 +7,6 @@ is_branch_checkout=$3
 
 # $1 (previous) and $2 (current) will be equal when checking out a new branch.
 if [ "$is_branch_checkout" -eq 1 ] && [ "$1" != "$2" ]; then
-    {{ interpreter }} -m django_migrant migrate
+    {{ interpreter }} -m django_migrant migrate $1
 fi
 ##### END django_migrant #####
