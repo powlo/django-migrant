@@ -1,0 +1,5 @@
+
+
+##### START django_migrant #####
+echo "REBASE" > .migrant
+##### END django_migrant #####

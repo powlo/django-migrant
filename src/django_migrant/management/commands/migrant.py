@@ -94,38 +94,49 @@ class Command(BaseCommand):
         if not dest_git_hooks_path:
             raise CommandError(f"'{path}' does not contain a 'hooks' directory.")
 
-        dest_post_checkout_file = dest_git_hooks_path / "post-checkout"
-        if dest_post_checkout_file.is_file():
-            ok_to_append = input("{path} already exists. Append to file [y/N]? ")
+        context = {"interpreter": options["interpreter"]}
+        self.create_hook(dest_git_hooks_path, "post-checkout", context)
+        self.create_hook(dest_git_hooks_path, "pre-rebase")
+
+    def create_hook(self, path: Path, name: str, context: dict = None):
+        if context is None:
+            context = {}
+        hook_filename = path / name
+        if hook_filename.is_file():
+            ok_to_append = input(
+                f"'{name}' hook already exists. Append to file [y/N]? "
+            )
             if ok_to_append.upper() != "Y":
                 raise CommandError(f"'{path}' already contains a post-checkout hook.")
-            file_exists = True
+            exists = True
         else:
-            file_exists = False
+            exists = False
 
-        src_post_checkout_file = (
-            resources.files("django_migrant") / "hook_templates" / "post-checkout"
-        )
+        template_filename = resources.files("django_migrant") / "hook_templates" / name
 
-        with open(src_post_checkout_file, "r") as fh:
-            template = fh.read()
+        with open(template_filename, "r") as fh:
+            content = fh.read()
 
-        template = template.replace("{{ interpreter }}", options["interpreter"])
+        # A poor mans templating system.
+        for key, value in context.items():
+            content = content.replace("{{ %s }}" % key, value)
 
-        header_file = resources.files("django_migrant") / "hook_templates" / "header"
-        with open(header_file, "r") as fh:
-            header = fh.read()
+        if not exists:
+            header_filename = (
+                resources.files("django_migrant") / "hook_templates" / "header"
+            )
+            with open(header_filename, "r") as fh:
+                header = fh.read()
 
-        header = header.replace("{{ name }}", str(dest_post_checkout_file))
-
-        if file_exists:
-            with open(dest_post_checkout_file, "a") as fh:
-                fh.write(template)
+            header = header.replace("{{ name }}", str(name))
         else:
-            template = header + template
-            with open(dest_post_checkout_file, "a") as fh:
-                fh.write(template)
-        self.stdout.write(f"git hook created: {dest_post_checkout_file}")
+            header = ""
+
+        content = header + content
+        with open(hook_filename, "a") as fh:
+            fh.write(content)
+
+        self.stdout.write(f"{name} hook created: {hook_filename}")
 
     def migrate(self, *args, **options):
         DJANGO_MIGRANT_STAGE = os.environ.get("DJANGO_MIGRANT_STAGE")

@@ -1,5 +1,4 @@
 import os
-import sys
 from importlib import resources
 from io import StringIO
 from pathlib import Path
@@ -57,9 +56,6 @@ class CommandTests(DjangoSetupTestCase):
         with open(templates_dir / "header", "r") as fh:
             header = fh.read()
 
-        with open(templates_dir / "post-checkout", "r") as fh:
-            template = fh.read()
-
         with TemporaryDirectory() as temp_dir_name:
             hooks_path = Path(temp_dir_name) / ".git" / "hooks"
             hooks_path.mkdir(parents=True)
@@ -67,12 +63,22 @@ class CommandTests(DjangoSetupTestCase):
 
             with open(hooks_path / "post-checkout") as fh:
                 contents = fh.read()
-                # Only check parts of templates are present because
-                # we will have substituted filename and interpreter path
                 self.assertTrue(contents.startswith(header[:9]))
-                self.assertTrue(template[:34] in contents)
+                # A phrase we definitely expect to see in the hook.
+                self.assertTrue("django_migrant migrate" in contents)
 
-        self.assertTrue(out.startswith("git hook created: "))
+            with open(hooks_path / "pre-rebase") as fh:
+                contents = fh.read()
+                self.assertTrue(contents.startswith(header[:9]))
+                self.assertTrue('echo "REBASE" > .migrant' in contents)
+
+        output = out.split("\n")
+        # Remove the runt line.
+        output = [x for x in output if x]
+        self.assertEqual(len(output), 2)
+        # The order of output doesn't really matter.
+        self.assertTrue(output[0].startswith("post-checkout hook created: "))
+        self.assertTrue(output[1].startswith("pre-rebase hook created: "))
         self.assertEqual(err, "")
 
     @mock.patch(
