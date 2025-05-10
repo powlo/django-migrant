@@ -94,13 +94,10 @@ class Command(BaseCommand):
         if not dest_git_hooks_path:
             raise CommandError(f"'{path}' does not contain a 'hooks' directory.")
 
-        context = {"interpreter": options["interpreter"]}
-        self.create_hook(dest_git_hooks_path, "post-checkout", context)
+        self.create_hook(dest_git_hooks_path, "post-checkout")
         self.create_hook(dest_git_hooks_path, "pre-rebase")
 
-    def create_hook(self, path: Path, name: str, context: dict = None):
-        if context is None:
-            context = {}
+    def create_hook(self, path: Path, name: str):
         hook_filename = path / name
         if hook_filename.is_file():
             ok_to_append = input(
@@ -116,10 +113,6 @@ class Command(BaseCommand):
 
         with open(template_filename, "r") as fh:
             content = fh.read()
-
-        # A poor mans templating system.
-        for key, value in context.items():
-            content = content.replace("{{ %s }}" % key, value)
 
         if not exists:
             header_filename = (

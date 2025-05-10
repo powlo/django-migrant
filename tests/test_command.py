@@ -65,7 +65,7 @@ class CommandTests(DjangoSetupTestCase):
                 contents = fh.read()
                 self.assertTrue(contents.startswith(header[:9]))
                 # A phrase we definitely expect to see in the hook.
-                self.assertTrue("django_migrant migrate" in contents)
+                self.assertTrue("./manage.py migrant migrate" in contents)
 
             with open(hooks_path / "pre-rebase") as fh:
                 contents = fh.read()
