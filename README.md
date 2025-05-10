@@ -5,7 +5,7 @@
 ![Pypi Version](https://img.shields.io/pypi/v/django-migrant)
 ![GitHub License](https://img.shields.io/github/license/powlo/django-migrant)
 
-`django-migrant` is a tool that allows developers to automatically migrate their development database when switching from one git branch to another. A common use case is when asked to run a collegue's branch. With `django-migrant` you no longer need to figure out which migrations need to be rolled back in order to then apply another branch's migrations.
+`django-migrant` is a tool that allows developers to automatically migrate their development database when switching from one git branch to another. A common use case is when asked to run a colleague's branch. With `django-migrant` you no longer need to figure out which migrations need to be rolled back in order to then apply another branch's migrations.
 
 > [!IMPORTANT]
 > The tool relies on proper reverse migrations having been written!
@@ -17,57 +17,56 @@
 
 ## How it works.
 
-django-migrant will create a post-checkout hook in a repositories "hooks" directory.
+`django-migrant` will create a `post-checkout` and a `pre-rebase` hook in a repository's "hooks" directory.
 
 When you checkout a branch the hook will determine which django migrations need to be rolled back, go to the previous branch and roll back, then return to your target branch and migrate forwards.
 
+The tool deliberately does not perform migration operations during a `git rebase` however, assuming the rebase goes well (🤞), it should just be a case of running `./manage.py migrate`, right? 🙂
 
 ## Installation
 
 1) Install the python package.
 
-        pip install git+https://github.com/powlo/django-migrant@master
+        pip install django-migrant
+
+2) Add django_migrant to settings.py
+
+        #settings.py
+        INSTALLED_APPS = [
+            # ...
+            "django_migrant",
+            # ...
+        ]
 
 2) Install the post-checkout hook:
 
-        python -m django_migrant install <destination> [-i <interpreter>]
+        ./manage.py migrant install <destination>
 
     Eg,
 
-        python -m django_migrant install .
+        ./manage.py migrant install .
 
-    Will attempt to install the hook in the current directory.
-    
-    The interpreter used by the hook can be configured using the optional `-i` / `--interpreter` switch:
+    ...will attempt to install the hook in the current directory.
 
-        python -m django_migrant install . -i ./myvenv/bin/python
+3) Review and adapt the hooks if necessary.
 
-3) **IMPORTANT!** Read and verify the post-checkout hook and change permissions to allow it to be invoked.
+The hooks are installed assuming that the application has been added to settings.py and that the appropriate python interpreter is available when executing the hook. This should work for most users.
 
-    Eg,
+However, instead of adding `django_migrant` to your INSTALLED_APPS, you may wish to change the post-checkout script to invoke the python module directly. For example:
 
-        cd <mydjangoproject>
-        chmod +x ./.git/hooks/post-checkout
+    #.git/hooks/post-checkout
+    DJANGO_SETTINGS_MODULE=myproject.settings python -m django_migrant migrate
 
-If you wish you can specify the package as a django app:
+Similarly, you may wish to specify the full path to the python interpreter:
 
-    # settings.py
-    INSTALLED_APPS = [
-        # ...
-        "django_migrant",
-        # ...
-    ]
+    #.git/hooks/post-checkout
+    /home/myname/virtualenvs/myproject/bin/python ./manage.py migrant migrate
 
-And then change the invocation to use django admin command.
+Check the hook invocation matches the nuances of your own environment.
+
+**IMPORTANT!** Change the permissions on the hooks to allow them to be invoked.
 
 Eg,
 
-    #!/bin/bash
-    # .git/hooks/post-checkout
-
-    # ...
-    if [ "$is_branch_checkout" == "1" ]; then
-        ./manage.py django_migrant migrate # <--- here
-    fi
-
-(But this doesn't change the tool's behaviour.)
+    chmod +x ./.git/hooks/post-checkout
+    chmod +x ./.git/hooks/pre-rebase
