@@ -1,7 +1,7 @@
 [project]
 name = "django-migrant"
 keywords = ["django", "developer", "migration", "tool", "git"]
-version = "0.0.8"
+version = "0.0.9"
 authors = [
   { name="Paul Backhouse" },
 ]
