@@ -2,26 +2,31 @@
 
 ![Github Branch Status](https://img.shields.io/github/check-runs/powlo/django-migrant/master)
 ![Coverage](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fgist.githubusercontent.com%2Fpowlo%2Fcf4b630256dbda26650c528b9eecede5%2Fraw%2Fdjango-migrant_coverage.json&query=%24.totals.percent_covered_display&suffix=%25&label=coverage)
-![Pypi Version](https://img.shields.io/pypi/v/django-migrant)
-![GitHub License](https://img.shields.io/github/license/powlo/django-migrant)
+![Pypi Version](https://img.shields.io/pypi/v/django-migrant) ![GitHub License](https://img.shields.io/github/license/powlo/django-migrant) [![Published on Django Packages](https://img.shields.io/badge/Published%20on-Django%20Packages-0c3c26)](https://djangopackages.org/packages/p/django-migrant/)
 
 `django-migrant` is a tool that allows developers to automatically migrate their development database when switching from one git branch to another. A common use case is when asked to run a colleague's branch. With `django-migrant` you no longer need to figure out which migrations need to be rolled back in order to then apply another branch's migrations.
 
 > [!IMPORTANT]
 > The tool relies on proper reverse migrations having been written!
 
-## Requirements:
+## Requirements
 
 - A django project, version controlled using git, with database migrations.
 
 
-## How it works.
+## How it works
 
 `django-migrant` will create a `post-checkout` and a `pre-rebase` hook in a repository's "hooks" directory.
 
 When you checkout a branch the hook will determine which django migrations need to be rolled back, go to the previous branch and roll back, then return to your target branch and migrate forwards.
 
 The tool deliberately does not perform migration operations during a `git rebase` however, assuming the rebase goes well (🤞), it should just be a case of running `./manage.py migrate`, right? 🙂
+
+## Example
+
+![Screencast](screencast.gif)
+
+The example repository can be found at https://github.com/powlo/django-migrant-example
 
 ## Installation
 
