@@ -6,7 +6,7 @@
 is_branch_checkout=$3
 
 # If we're rebasing then don't try to migrate.
-if [ "$(cat .migrant)" = "REBASE" ]; then
+if [ -f .migrant ] && [ "$(cat .migrant)" = "REBASE" ]; then
     is_rebase=1
     echo "" > .migrant
 else is_rebase=0
